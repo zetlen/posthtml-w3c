@@ -6,6 +6,11 @@
     "node": ">=4"
   },
   "main": "index.js",
+  "scripts": {
+    "test": "npm run -S unit -- --coverage-report text-lcov",
+    "watch": "npm run -S unit -- --reporter terse --no-coverage-report --no-check-coverage --watch",
+    "unit": "tap test/*.js"
+  },
   "dependencies": {
     "log-symbols": "^3.0.0",
     "posthtml-render": "^1.2.0",
@@ -13,7 +18,9 @@
     "w3cjs": "^0.4.0"
   },
   "devDependencies": {
-    "posthtml": "^0.12.0"
+    "nodemon": "^2.0.15",
+    "posthtml": "^0.12.0",
+    "tap": "^15.1.5"
   },
   "keywords": [
     "HTML",

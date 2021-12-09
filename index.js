@@ -4,17 +4,17 @@
 
 'use strict'
 
-let chalk = require('chalk')
-let tab = require('text-table')
-let log = require('log-symbols')
+const chalk = require('chalk')
+const tab = require('text-table')
+const log = require('log-symbols')
 
-let render = require('posthtml-render')
-let w3c = require('w3cjs')
+const render = require('posthtml-render')
+const w3c = require('w3cjs')
 
-let title = require('./lib/title')
-let type = require('./lib/type')
-let line = require('./lib/line')
-let message = require('./lib/msg')
+const title = require('./lib/title')
+const type = require('./lib/type')
+const line = require('./lib/line')
+const message = require('./lib/msg')
 
 exports = module.exports = function (options) {
   options = options || {}
@@ -28,38 +28,24 @@ exports = module.exports = function (options) {
         input: render(tree),
         output: 'json',
         callback: function (err, res) {
-          if (!res.messages || res.messages.length === 0) {
+
+          const report = {
+            from: 'posthtml-w3c',
+            validationMessages: res.messages
+          };
+
+          if (!res.messages || res.messages.length === 0 && !options.hideEmpty) {
+            tree.messages.push({
+              ...report,
+              errors: false
+            })
             return resolve(tree);
           }
-          const filtered = res.messages
+
+          if (options.filter.length > 0) {
+            report.messages = res.messages
             .filter(msg => !options.filter.some(s => msg.message.includes(s)))
-
-          let table = tab(filtered.map(msg => {
-            let row = [
-              `\n${type(msg.type) + ' ' + line(msg.lastLine, msg.firstColumn)}`,
-              `\n${message(msg.message)}`
-            ]
-
-            return row
-          }), {align: 'l', hsep: ''})
-
-          let result = filtered.length
-
-          if (result > 0 || !options.hideEmpty) {
-            title('\nPostHTML W3C Validation')
           }
-
-          if (result > 0) {
-            console.log(table)
-          }
-
-          if (result === 0 && !options.hideEmpty) {
-            console.log(chalk.green(`\n${log.success}  ${result} Errors`))
-          } else if (result > 0) {
-            console.log(chalk.red(`\n${log.warning}  ${result} Errors`))
-          }
-
-          resolve(tree);
         }
       })
 
